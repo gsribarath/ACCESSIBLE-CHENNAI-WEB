@@ -1,1186 +1,650 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navigate - Accessible Chennai</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #0b596c;
-      --primary-dark: #106e8d;
-      --accent: #f59e0b;
-      --success: #10b981;
-      --danger: #ef4444;
-      --blue-gradient: linear-gradient(135deg, #0a4861 0%, #145974 100%);
-      --glow-blue: 0 0 20px rgba(59, 130, 246, 0.5);
-      --glow-accent: 0 0 15px rgba(245, 158, 11, 0.6);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Chennai - Inclusive Public Transport Navigation</title>
+    <meta name="description" content="Helping people with disabilities navigate Chennai's public transport system with voice guidance, screen reader support, and wheelchair accessible routes.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-    * {
-      scroll-behavior: smooth;
-    }
+        :root {
+            --primary: #136087;
+            --secondary: #0876ae;
+            --accent: #f59e0b;
+            --dark: #0f172a;
+        }
 
-    body {
-      background: linear-gradient(135deg, #08354a 0%, #05374e 25%, #0e4e6c 50%, #0d5565 75%, #0e5f71 100%);
-      background-size: 400% 400%;
-      animation: gradientFlow 15s ease infinite;
-      min-height: 100vh;
-      font-family: 'Poppins', sans-serif;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a415d;
+            color: #f8fafc;
+        }
 
-    @keyframes gradientFlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+        /* Splash Screen Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .animate-slide-up {
+            animation: slideUp 0.8s ease-out 0.3s forwards;
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
 
-    .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
+        /* Reduced motion settings */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
 
-    .glass-strong {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    }
+        /* Accessibility focus styles */
+        .focusable:focus {
+            outline: 3px solid rgba(255, 255, 255, 0.8);
+            outline-offset: 2px;
+        }
 
-    .glow-primary {
-      box-shadow: var(--glow-blue);
-      transition: all 0.3s ease;
-    }
+        /* Text gradient */
+        .text-gradient {
+            background: linear-gradient(90deg, #ffffff 0%, #e0f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    .glow-primary:hover {
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
-      transform: translateY(-2px);
-    }
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
 
-    .glow-accent {
-      box-shadow: var(--glow-accent);
-    }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
 
-    .voice-toggle {
-      position: relative;
-      width: 80px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
+        /* Pulse animation */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
 
-    .voice-toggle.active {
-      background: var(--blue-gradient);
-      box-shadow: var(--glow-blue);
-      border-color: #3b82f6;
-    }
+        /* 360 Degree Rotation */
+        @keyframes rotate360 {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-    .voice-toggle-slider {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 30px;
-      height: 30px;
-      background: white;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .rotate-360 {
+            animation: rotate360 20s linear infinite;
+        }
 
-    .voice-toggle.active .voice-toggle-slider {
-      transform: translateX(40px);
-      background: #fff;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    }
+        /* Pop-up animation */
+        @keyframes pop-up {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
-    .audio-wave {
-      display: none;
-      position: absolute;
-      right: -30px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
+        .pop-up {
+            animation: pop-up 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
 
-    .voice-toggle.active .audio-wave {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
+        /* Vehicle orbit animation */
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+        }
 
-    .wave-bar {
-      width: 3px;
-      height: 15px;
-      background: #3b82f6;
-      border-radius: 2px;
-      animation: waveAnimation 1.5s ease-in-out infinite;
-    }
+        @media (max-width: 768px) {
+            @keyframes orbit {
+                from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+                to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+            }
+        }
 
-    .wave-bar:nth-child(2) { animation-delay: 0.1s; }
-    .wave-bar:nth-child(3) { animation-delay: 0.2s; }
-    .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .orbit {
+            animation: orbit 12s linear infinite;
+        }
 
-    @keyframes waveAnimation {
-      0%, 100% { height: 10px; opacity: 0.3; }
-      50% { height: 25px; opacity: 1; }
-    }
+        /* Glow effect */
+        .glow {
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+        }
 
-    .route-card {
-      transform: translateY(20px);
-      opacity: 0;
-      transition: all 0.6s ease;
-    }
+        /* Card hover effects */
+        .feature-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
 
-    .route-card.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
+        .feature-card:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
 
-    .route-card:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    }
+        .feature-card:active {
+            transform: scale(0.98);
+        }
 
-    .parallax-section {
-      transform: translateY(50px);
-      opacity: 0;
-      transition: all 0.8s ease;
-    }
+        /* Modal transition */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9);
+        }
 
-    .parallax-section.visible {
-      transform: translateY(0);
-      opacity: 1;
-    }
+        .modal-enter-active {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 300ms, transform 300ms;
+        }
 
-    .transit-icon {
-      animation: pulse 2s ease-in-out infinite;
-    }
+        .modal-exit {
+            opacity: 1;
+        }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-    }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 300ms, transform 300ms;
+        }
 
-    .live-border {
-      border: 2px solid transparent;
-      background: linear-gradient(45deg, #3b82f6, #60a5fa) border-box;
-      background-clip: padding-box, border-box;
-      animation: borderGlow 3s ease-in-out infinite;
-    }
+        /* Light pulse effect */
+        @keyframes light-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
 
-    @keyframes borderGlow {
-      0%, 100% { border-color: rgba(59, 130, 246, 0.5); }
-      50% { border-color: rgba(59, 130, 246, 1); }
-    }
+        .light-pulse {
+            animation: light-pulse 1s cubic-bezier(0.4, 0, 0.6, 1);
+        }
 
-    .route-card.selected {
-      animation: routeSelect 0.8s ease;
-    }
+        /* 3D rotation effect */
+        @keyframes rotate-y {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
 
-    @keyframes routeSelect {
-      0% { transform: scale(1) rotate(0deg); }
-      50% { transform: scale(1.05) rotate(2deg); }
-      100% { transform: scale(1) rotate(0deg); }
-    }
-
-    .hover-light {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hover-light::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .hover-light:hover::before {
-      left: 100%;
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    button:focus, input:focus, select:focus {
-      outline: 3px solid #f59e0b;
-      outline-offset: 2px;
-    }
-
-    .refresh-indicator {
-      display: inline-block;
-      animation: rotate 2s linear infinite;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .slide-in-left {
-      transform: translateX(-50px);
-      opacity: 0;
-      transition: all 0.6s ease;
-    }
-
-    .slide-in-left.show {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .slide-in-right {
-      transform: translateX(50px);
-      opacity: 0;
-      transition: all 0.6s ease;
-    }
-
-    .slide-in-right.show {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .map-redirect-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
-
-    .map-redirect-content {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 2rem;
-      border-radius: 1rem;
-      text-align: center;
-      max-width: 400px;
-      animation: bounceIn 0.6s ease;
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.3); opacity: 0; }
-      50% { transform: scale(1.05); }
-      70% { transform: scale(0.9); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .voice-guide-button {
-      animation: pulseGlow 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
-      50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
-    }
-
-    /* Dropdown Styling */
-    select {
-      appearance: none;
-      background-color: #FFFFFF;
-      color: #000000;
-      font-family: 'Poppins', sans-serif;
-      font-size: 16px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #3b82f6;
-      width: 100%;
-      max-height: 200px;
-      overflow-y: auto;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    select:focus {
-      border-color: #f59e0b;
-      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
-      transform: scale(1.02);
-    }
-
-    select option {
-      padding: 10px;
-      background-color: #FFFFFF;
-      color: #000000;
-      font-family: 'Poppins', sans-serif;
-      font-size: 16px;
-    }
-
-    select option:hover {
-      background-color: #e0f7ff;
-      color: #000000;
-      font-weight: 600;
-    }
-
-    select option:checked {
-      background-color: #e0f7ff;
-      transform: scale(1.05);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
-    }
-
-    select::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    select::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    select::-webkit-scrollbar-thumb {
-      background: #3b82f6;
-      border-radius: 4px;
-    }
-
-    .listening-indicator {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(59, 130, 246, 0.95);
-      color: white;
-      padding: 20px 40px;
-      border-radius: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      z-index: 1000;
-      display: none;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @media (max-width: 768px) {
-      select {
-        font-size: 14px;
-        padding: 10px;
-        max-height: 150px;
-      }
-
-      .voice-toggle {
-        width: 60px;
-        height: 30px;
-      }
-      
-      .voice-toggle-slider {
-        width: 24px;
-        height: 24px;
-      }
-      
-      .voice-toggle.active .voice-toggle-slider {
-        transform: translateX(30px);
-      }
-    }
-
-    @media (prefers-contrast: high) {
-      .glass, .glass-strong {
-        background: rgba(255, 255, 255, 0.9);
-        color: #000;
-      }
-
-      select {
-        background-color: #FFFFFF;
-        color: #000000;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-  </style>
+        .rotate-y {
+            animation: rotate-y 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
 </head>
-<body class="text-white">
-  <!-- Header -->
-  <header class="fixed top-0 w-full z-50 glass backdrop-blur-xl">
-    <div class="max-w-7xl mx-auto px-4 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <a href="#" class="flex items-center space-x-1 focusable rounded-md" aria-label="Accessible Chennai Home">
-            <div class="w-20 h-20 rounded-full flex items-center justify-center">
-              <img src="ACCESSIBLECHENNAII.png" alt="Accessible Chennai Logo" class="w-16 h-16 object-cover rounded-full">
+<body class="min-h-screen flex flex-col">
+    <!-- Splash Screen -->
+    <div id="splash" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: #0d3a58;">
+        <div class="text-center">
+            <div class="mb-10 animate-fade-in">
+                <div class="flex items-center justify-center">
+                    <img src="ACCESSIBLECHENNAII.png" alt="Accessible Chennai Logo" class="h-96 w-96 object-cover rounded-full animate-pulse shadow-2xl">
+                </div>
             </div>
-            <h1 class="text-2xl font-bold">Accessible<span class="bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent"> Chennai</span></h1>
-          </a>
+            <h1 class="text-6xl font-extrabold text-white mb-4 animate-slide-up tracking-wide">Accessible Chennai</h1>
+            <p class="text-white text-2xl opacity-0 animate-slide-up font-light">Loading...</p>
         </div>
-        <nav>
-          <a href="home.html" class="text-blue-200 hover:text-white mx-3" aria-label="Home">Home</a>
-          <a href="navigate.html" class="text-white font-semibold mx-3" aria-label="Navigate">Navigate</a>
-          <a href="alerts.html" class="text-blue-200 hover:text-white mx-3" aria-label="Alerts">Alerts</a>
-        </nav>
-      </div>
     </div>
-  </header>
 
-  <!-- Main Content -->
-  <main class="pt-32 pb-12 max-w-7xl mx-auto px-4">
-    <!-- Plan Your Journey -->
-    <section class="mb-12 parallax-section">
-      <div class="glass-strong p-8 rounded-3xl">
-        <h2 class="text-4xl font-bold mb-6 text-center">
-          <i class="fas fa-route text-blue-300 mr-3" aria-hidden="true"></i>
-          Plan Your Journey
-        </h2>
-        
-        <form id="journey-form" class="space-y-6">
-          <!-- Location Inputs -->
-          <div class="grid md:grid-cols-2 gap-6">
-            <div class="slide-in-left">
-              <label for="current-location" class="block text-lg font-semibold mb-3">
-                <i class="fas fa-map-marker-alt text-green-400 mr-2" aria-hidden="true"></i>
-                Start Location
-              </label>
-              <div class="relative">
-                <select 
-                  id="current-location" 
-                  class="w-full p-4 rounded-xl text-black"
-                  aria-label="Select your current location"
-                >
-                  <option value="" disabled selected>Select your current location</option>
-                  <option value="Adyar">Adyar</option>
-                  <option value="Alwarpet">Alwarpet</option>
-                  <option value="Anna Nagar">Anna Nagar</option>
-                  <option value="Ashok Nagar">Ashok Nagar</option>
-                  <option value="Besant Nagar">Besant Nagar</option>
-                  <option value="Chetpet">Chetpet</option>
-                  <option value="Chennai Central Railway Station">Chennai Central Railway Station</option>
-                  <option value="Chennai International Airport">Chennai International Airport</option>
-                  <option value="Chromepet">Chromepet</option>
-                  <option value="Egmore">Egmore</option>
-                  <option value="Express Avenue Mall">Express Avenue Mall</option>
-                  <option value="Guindy">Guindy</option>
-                  <option value="Kilpauk">Kilpauk</option>
-                  <option value="Kodambakkam">Kodambakkam</option>
-                  <option value="Koyambedu">Koyambedu</option>
-                  <option value="Marina Beach">Marina Beach</option>
-                  <option value="Mount Road">Mount Road</option>
-                  <option value="Mylapore">Mylapore</option>
-                  <option value="Nungambakkam">Nungambakkam</option>
-                  <option value="Perambur">Perambur</option>
-                  <option value="Phoenix MarketCity Mall">Phoenix MarketCity Mall</option>
-                  <option value="Royapettah">Royapettah</option>
-                  <option value="Saidapet">Saidapet</option>
-                  <option value="T. Nagar">T. Nagar</option>
-                  <option value="Tambaram">Tambaram</option>
-                  <option value="Teynampet">Teynampet</option>
-                  <option value="Thiruvanmiyur">Thiruvanmiyur</option>
-                  <option value="Vadapalani">Vadapalani</option>
-                  <option value="Velachery">Velachery</option>
-                </select>
-              </div>
+    <!-- Skip to content link for screen readers -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:bg-white focus:text-blue-600 focus:rounded-md focus:z-50">
+        Skip to main content
+    </a>
+
+    <!-- Header with navigation -->
+    <header class="bg-blue-600/20 backdrop-blur-md sticky top-0 z-40 shadow-lg hidden" id="header">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-1">
+                <a href="#" class="flex items-center space-x-1 focusable rounded-md" data-aos="fade-right">
+                    <div class="w-20 h-20 rounded-full flex items-center justify-center">
+                        <img src="ACCESSIBLECHENNAII.png" alt="Accessible Chennai Logo" class="w-16 h-16 object-cover rounded-full">
+                    </div>
+                    <h1 class="text-2xl font-bold">Accessible<span class="bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent"> Chennai</span></h1>
+                </a>
             </div>
             
-            <div class="slide-in-right">
-              <label for="destination" class="block text-lg font-semibold mb-3">
-                <i class="fas fa-flag-checkered text-red-400 mr-2" aria-hidden="true"></i>
-                Destination
-              </label>
-              <div class="relative">
-                <select 
-                  id="destination" 
-                  class="w-full p-4 rounded-xl text-black"
-                  aria-label="Select your destination"
-                >
-                  <option value="" disabled selected>Select your destination</option>
-                  <option value="Adyar">Adyar</option>
-                  <option value="Alwarpet">Alwarpet</option>
-                  <option value="Anna Nagar">Anna Nagar</option>
-                  <option value="Ashok Nagar">Ashok Nagar</option>
-                  <option value="Besant Nagar">Besant Nagar</option>
-                  <option value="Chetpet">Chetpet</option>
-                  <option value="Chennai Central Railway Station">Chennai Central Railway Station</option>
-                  <option value="Chennai International Airport">Chennai International Airport</option>
-                  <option value="Chromepet">Chromepet</option>
-                  <option value="Egmore">Egmore</option>
-                  <option value="Express Avenue Mall">Express Avenue Mall</option>
-                  <option value="Guindy">Guindy</option>
-                  <option value="Kilpauk">Kilpauk</option>
-                  <option value="Kodambakkam">Kodambakkam</option>
-                  <option value="Koyambedu">Koyambedu</option>
-                  <option value="Marina Beach">Marina Beach</option>
-                  <option value="Mount Road">Mount Road</option>
-                  <option value="Mylapore">Mylapore</option>
-                  <option value="Nungambakkam">Nungambakkam</option>
-                  <option value="Perambur">Perambur</option>
-                  <option value="Phoenix MarketCity Mall">Phoenix MarketCity Mall</option>
-                  <option value="Royapettah">Royapettah</option>
-                  <option value="Saidapet">Saidapet</option>
-                  <option value="T. Nagar">T. Nagar</option>
-                  <option value="Tambaram">Tambaram</option>
-                  <option value="Teynampet">Teynampet</option>
-                  <option value="Thiruvanmiyur">Thiruvanmiyur</option>
-                  <option value="Vadapalani">Vadapalani</option>
-                  <option value="Velachery">Velachery</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Accessibility Requirements -->
-          <div class="parallax-section">
-            <h3 class="text-2xl font-semibold mb-4">
-              <i class="fas fa-universal-access text-purple-400 mr-2" aria-hidden="true"></i>
-              Accessibility Requirements
-            </h3>
-            <div class="grid md:grid-cols-3 gap-4">
-              <label class="glass p-4 rounded-xl cursor-pointer hover-light hover:bg-blue-500/20 transition-all">
-                <input type="checkbox" id="wheelchair-access" class="mr-3">
-                <i class="fas fa-wheelchair text-green-400 mr-2" aria-hidden="true"></i>
-                Wheelchair Access
-              </label>
-              <label class="glass p-4 rounded-xl cursor-pointer hover-light hover:bg-blue-500/20 transition-all">
-                <input type="checkbox" id="voice-guide" class="mr-3" checked>
-                <i class="fas fa-volume-up text-blue-400 mr-2" aria-hidden="true"></i>
-                Voice Guide
-              </label>
-              <label class="glass p-4 rounded-xl cursor-pointer hover-light hover:bg-blue-500/20 transition-all">
-                <input type="checkbox" id="step-free" class="mr-3">
-                <i class="fas fa-walking text-yellow-400 mr-2" aria-hidden="true"></i>
-                Step-Free Path
-              </label>
-            </div>
-          </div>
-
-          <!-- Find Route Button -->
-          <div class="text-center parallax-section">
-            <button 
-              type="submit" 
-              class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-12 py-4 rounded-2xl text-xl font-bold hover-light glow-primary transition-all duration-300"
-              aria-label="Find accessible route"
-            >
-              <i class="fas fa-search-location mr-3" aria-hidden="true"></i>
-              <span id="route-button-text">Find Accessible Route</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Route Results Section -->
-    <section id="route-results" class="mb-12 hidden">
-      <div class="glass-strong p-8 rounded-3xl">
-        <h3 class="text-3xl font-bold mb-6 text-center">
-          <i class="fas fa-route text-blue-300 mr-3" aria-hidden="true"></i>
-          Your Accessible Route Options
-        </h3>
-        <div id="route-cards" class="space-y-6">
+            <nav aria-label="Main navigation" data-aos="fade-left">
+                <ul class="flex space-x-1">
+                    <li>
+                        <a href="index.html" class="px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 focusable transition-all duration-300">Home</a>
+                    </li>
+                    <li>
+                        <a href="navigate.html" class="px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 focusable transition-all duration-300">Navigate</a>
+                    </li>
+                    <li>
+                        <a href="community.html" class="px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 focusable transition-all duration-300">Community</a>
+                    </li>
+                    <li>
+                        <a href="alerts.html" class="px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 focusable transition-all duration-300">Alerts</a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 focusable transition-all duration-300">Settings</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-      </div>
-    </section>
-  </main>
+    </header>
 
-  <!-- Map Redirect Overlay -->
-  <div id="map-overlay" class="map-redirect-overlay">
-    <div class="map-redirect-content">
-      <i class="fas fa-map-marked-alt text-blue-500 text-6xl mb-4 animate-pulse" aria-hidden="true"></i>
-      <h3 class="text-2xl font-bold text-gray-800 mb-4">Opening Google Maps</h3>
-      <p class="text-gray-600 mb-6">Your accessible route will open in Google Maps with voice navigation ready. MTC Buses and Train routes will be highlighted.</p>
-      <div class="flex justify-center space-x-4">
-        <button onclick="proceedToMaps()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-          Continue
-        </button>
-        <button onclick="closeMapOverlay()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors">
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Global variables
-    let speechSynthesis = window.speechSynthesis;
-    let speechRecognition = null;
-    let currentRoute = null;
-    let voiceInteractionState = {
-      isActive: true,
-      currentStep: 0, // 0: initial, 1: start location, 2: destination, 3: route selection
-      listening: false
-    };
-
-    // Initialize the application
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeApp();
-      setupSpeechRecognition();
-      startVoiceInteraction();
-    });
-
-    function initializeApp() {
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible', 'show');
-          }
-        });
-      }, observerOptions);
-
-      document.querySelectorAll('.parallax-section, .slide-in-left, .slide-in-right').forEach(el => {
-        observer.observe(el);
-      });
-
-      document.getElementById('journey-form').addEventListener('submit', handleRouteSearch);
-    }
-
-    function setupSpeechRecognition() {
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        speechRecognition = new SpeechRecognition();
-        speechRecognition.continuous = true;
-        speechRecognition.interimResults = false;
-        speechRecognition.lang = 'en-IN';
-        
-        speechRecognition.onresult = (event) => {
-          const result = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-          processVoiceCommand(result);
-        };
-
-        speechRecognition.onerror = (event) => {
-          if (event.error === 'not-allowed') {
-            voiceInteractionState.isActive = false;
-          }
-        };
-      }
-    }
-
-    function startVoiceInteraction() {
-      // Initial welcome message
-      speakMessage("WELCOME TO THE NAVIGATE PAGE. I AM HERE TO HELP YOU.");
-      
-      // Start listening in background
-      if (speechRecognition) {
-        try {
-          speechRecognition.start();
-        } catch (e) {
-          console.log("Speech recognition not available");
-        }
-      }
-
-      // Ask for start location after initial message
-      setTimeout(() => {
-        askForStartLocation();
-      }, 3000);
-    }
-
-    function askForStartLocation() {
-      voiceInteractionState.currentStep = 1;
-      speakMessage("PLEASE SELECT YOUR CURRENT LOCATION.");
-    }
-
-    function askForDestination() {
-      voiceInteractionState.currentStep = 2;
-      speakMessage("PLEASE SELECT YOUR DESTINATION.");
-    }
-
-    function confirmLocationsSelected() {
-      speakMessage("CURRENT LOCATION AND DESTINATION SELECTED SUCCESSFULLY.");
-      
-      // Auto-submit the form if both locations are selected
-      const start = document.getElementById('current-location').value;
-      const dest = document.getElementById('destination').value;
-      
-      if (start && dest) {
-        setTimeout(() => {
-          document.getElementById('journey-form').dispatchEvent(new Event('submit'));
-        }, 2000);
-      }
-    }
-
-    function askForRouteSelection() {
-      voiceInteractionState.currentStep = 3;
-      speakMessage("PLEASE SELECT THE OPTION.");
-    }
-
-    function processVoiceCommand(input) {
-      if (!voiceInteractionState.isActive) return;
-
-      const chennaiLocations = [
-        'adyar', 'alwarpet', 'anna nagar', 'ashok nagar', 'besant nagar', 'chetpet',
-        'chennai central railway station', 'central', 'chennai international airport', 'airport', 'chromepet',
-        'egmore', 'express avenue mall', 'express avenue', 'guindy', 'kilpauk', 'kodambakkam', 'koyambedu',
-        'marina beach', 'marina', 'mount road', 'mylapore', 'nungambakkam', 'perambur',
-        'phoenix marketcity mall', 'phoenix mall', 'royapettah', 'saidapet', 't nagar', 't. nagar', 'tambaram',
-        'teynampet', 'thiruvanmiyur', 'vadapalani', 'velachery'
-      ];
-
-      switch (voiceInteractionState.currentStep) {
-        case 1: // Start location
-          const startLocation = findBestMatch(input, chennaiLocations);
-          if (startLocation) {
-            setStartLocation(startLocation);
-            askForDestination();
-          }
-          break;
-
-        case 2: // Destination
-          const destination = findBestMatch(input, chennaiLocations);
-          if (destination) {
-            setDestination(destination);
-            confirmLocationsSelected();
-          }
-          break;
-
-        case 3: // Route selection
-          if (input.includes('option 1') || input.includes('option one') || input.includes('first option')) {
-            startNavigation(0);
-          } else if (input.includes('option 2') || input.includes('option two') || input.includes('second option')) {
-            startNavigation(1);
-          } else if (input.includes('option 3') || input.includes('option three') || input.includes('third option')) {
-            startNavigation(2);
-          }
-          break;
-      }
-    }
-
-    function findBestMatch(input, locations) {
-      // Direct match
-      for (let location of locations) {
-        if (input.includes(location)) {
-          return formatLocationName(location);
-        }
-      }
-
-      // Fuzzy matching for common variations
-      const variations = {
-        'anna nagar': ['anna', 'annanagar'],
-        't nagar': ['t.nagar', 'tnagar', 'tee nagar'],
-        'marina beach': ['marina'],
-        'chennai central railway station': ['central', 'central station'],
-        'chennai international airport': ['airport'],
-        'express avenue mall': ['express avenue', 'express'],
-        'phoenix marketcity mall': ['phoenix', 'phoenix mall'],
-        'besant nagar': ['besant'],
-        'thiruvanmiyur': ['thiruvamiyur', 'thiruvanmiyoor']
-      };
-
-      for (let [location, alts] of Object.entries(variations)) {
-        for (let alt of alts) {
-          if (input.includes(alt)) {
-            return formatLocationName(location);
-          }
-        }
-      }
-
-      return null;
-    }
-
-    function formatLocationName(location) {
-      const locationMap = {
-        'adyar': 'Adyar',
-        'alwarpet': 'Alwarpet',
-        'anna nagar': 'Anna Nagar',
-        'ashok nagar': 'Ashok Nagar',
-        'besant nagar': 'Besant Nagar',
-        'chetpet': 'Chetpet',
-        'chennai central railway station': 'Chennai Central Railway Station',
-        'central': 'Chennai Central Railway Station',
-        'chennai international airport': 'Chennai International Airport',
-        'airport': 'Chennai International Airport',
-        'chromepet': 'Chromepet',
-        'egmore': 'Egmore',
-        'express avenue mall': 'Express Avenue Mall',
-        'express avenue': 'Express Avenue Mall',
-        'guindy': 'Guindy',
-        'kilpauk': 'Kilpauk',
-        'kodambakkam': 'Kodambakkam',
-        'koyambedu': 'Koyambedu',
-        'marina beach': 'Marina Beach',
-        'marina': 'Marina Beach',
-        'mount road': 'Mount Road',
-        'mylapore': 'Mylapore',
-        'nungambakkam': 'Nungambakkam',
-        'perambur': 'Perambur',
-        'phoenix marketcity mall': 'Phoenix MarketCity Mall',
-        'phoenix mall': 'Phoenix MarketCity Mall',
-        'royapettah': 'Royapettah',
-        'saidapet': 'Saidapet',
-        't nagar': 'T. Nagar',
-        't. nagar': 'T. Nagar',
-        'tambaram': 'Tambaram',
-        'teynampet': 'Teynampet',
-        'thiruvanmiyur': 'Thiruvanmiyur',
-        'vadapalani': 'Vadapalani',
-        'velachery': 'Velachery'
-      };
-
-      return locationMap[location] || location;
-    }
-
-    function setStartLocation(location) {
-      const startSelect = document.getElementById('current-location');
-      startSelect.value = location;
-      speakMessage(`Start location set to ${location}.`);
-    }
-
-    function setDestination(location) {
-      const destSelect = document.getElementById('destination');
-      destSelect.value = location;
-      speakMessage(`Destination set to ${location}.`);
-    }
-
-    function handleRouteSearch(event) {
-      event.preventDefault();
-      
-      const currentLocation = document.getElementById('current-location').value;
-      const destination = document.getElementById('destination').value;
-      
-      if (!destination || !currentLocation) {
-        speakMessage('Please ensure both start location and destination are selected.');
-        return;
-      }
-
-      const routeButton = document.getElementById('route-button-text');
-      routeButton.innerHTML = '<div class="loading-spinner mr-2"></div> Finding Routes...';
-      
-      speakMessage('Searching for accessible routes. Please wait...');
-
-      setTimeout(() => {
-        displayRouteOptions(currentLocation, destination);
-        routeButton.textContent = 'Find Accessible Route';
-      }, 2500);
-    }
-
-    function displayRouteOptions(start, end) {
-      const routeResults = document.getElementById('route-results');
-      const routeCards = document.getElementById('route-cards');
-      
-      const accessibilityOptions = {
-        wheelchair: document.getElementById('wheelchair-access').checked,
-        voiceGuide: document.getElementById('voice-guide').checked,
-        stepFree: document.getElementById('step-free').checked
-      };
-
-      const routes = generateRoutes(start, end, accessibilityOptions);
-      
-      routeCards.innerHTML = routes.map((route, index) => `
-        <div class="route-card glass-strong p-6 rounded-2xl hover-light" data-route-index="${index}">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h4 class="text-2xl font-bold text-blue-300 mb-2">
-                <i class="fas fa-${route.icon} mr-2" aria-hidden="true"></i>
-                ${route.name}
-              </h4>
-              <p class="text-blue-200">${route.description}</p>
-            </div>
-            <div class="text-right">
-              <div class="text-3xl font-bold text-green-400">${route.duration}</div>
-              <div class="text-sm text-blue-300">${route.distance} • ${route.cost}</div>
-            </div>
-          </div>
-          
-          <div class="mb-4">
-            <div class="flex items-center mb-3">
-              <div class="flex text-yellow-400">
-                ${Array(route.accessibilityRating).fill('<i class="fas fa-star"></i>').join('')}
-                ${Array(5 - route.accessibilityRating).fill('<i class="far fa-star"></i>').join('')}
-              </div>
-              <span class="ml-2 text-sm text-blue-200">Accessibility Rating</span>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              ${route.features.map(feature => `
-                <span class="px-3 py-1 bg-blue-500/30 text-blue-200 rounded-full text-sm border border-blue-400/30">
-                  <i class="fas fa-check mr-1" aria-hidden="true"></i>${feature}
-                </span>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="mb-6">
-            <h5 class="font-semibold mb-3 text-blue-300">Route Steps:</h5>
-            <div class="space-y-2">
-              ${route.steps.map((step, stepIndex) => `
-                <div class="flex items-start p-2 glass rounded-lg">
-                  <span class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3 mt-0.5 flex-shrink-0">
-                    ${stepIndex + 1}
-                  </span>
-                  <span class="text-blue-100">${step}</span>
+    <!-- Main content -->
+    <main id="main-content" class="flex-grow hidden">
+        <!-- Hero section -->
+        <section aria-labelledby="hero-heading" class="relative overflow-hidden py-12 md:py-24">
+            <!-- Vehicle orbit animation in top right corner -->
+            <div class="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
+                <div class="absolute top-0 right-0 w-full h-full">
+                    <div class="relative w-full h-full">
+                        <div class="orbit absolute top-1/4 -right-1/4 md:top-1/4 md:-right-1/4">
+                            <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-xl glow">
+                                <i class="fas fa-bus"></i>
+                            </div>
+                        </div>
+                        <div class="orbit absolute top-1/4 -right-1/4 md:top-1/4 md:-right-1/4" style="animation-delay: -3s;">
+                            <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-xl glow">
+                                <i class="fas fa-subway"></i>
+                            </div>
+                        </div>
+                        <div class="orbit absolute top-1/4 -right-1/4 md:top-1/4 md:-right-1/4" style="animation-delay: -6s;">
+                            <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-xl glow">
+                                <i class="fas fa-taxi"></i>
+                            </div>
+                        </div>
+                        <div class="orbit absolute top-1/4 -right-1/4 md:top-1/4 md:-right-1/4" style="animation-delay: -9s;">
+                            <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-xl glow">
+                                <i class="fas fa-wheelchair"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              `).join('')}
             </div>
-          </div>
+            
+            <div class="container mx-auto px-4 relative z-10">
+                <div class="flex flex-col items-center text-center">
+                    <div class="max-w-3xl space-y-8" data-aos="fade-up">
+                        <h1 id="hero-heading" class="text-4xl md:text-6xl font-bold leading-tight">
+                            <span class="text-white">Chennai Transport</span><br>
+                            <span class="text-gradient">Made Accessible</span>
+                        </h1>
+                        <p class="text-xl text-white/90 max-w-2xl mx-auto">
+                            Navigate the city with confidence using our inclusive transportation platform designed for everyone.
+                        </p>
+                        <div class="pt-8">
+                            <a href="navigate.html" class="inline-block bg-white text-blue-600 px-12 py-4 rounded-full font-bold hover:bg-gray-100 focusable transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl text-lg md:text-xl" data-aos="zoom-in" data-aos-delay="300">
+                                <i class="fas fa-play mr-2"></i> Get Started
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-          <div class="flex flex-wrap gap-3">
-            <button 
-              onclick="startNavigation(${index})"
-              class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover-light glow-accent transition-all flex items-center"
-              aria-label="Start navigation for ${route.name}"
-            >
-              <i class="fas fa-route mr-2" aria-hidden="true"></i>
-              Start Navigation
-            </button>
-            <button 
-              onclick="shareRoute(${index})"
-              class="glass px-6 py-3 rounded-xl font-semibold hover-light transition-all flex items-center"
-              aria-label="Share ${route.name}"
-            >
-              <i class="fas fa-share-alt mr-2" aria-hidden="true"></i>
-              Share Route
-            </button>
-            <button 
-              onclick="saveRoute(${index})"
-              class="glass px-6 py-3 rounded-xl font-semibold hover-light transition-all flex items-center"
-              aria-label="Save ${route.name}"
-            >
-              <i class="fas fa-bookmark mr-2" aria-hidden="true"></i>
-              Save Route
-            </button>
-          </div>
+        <!-- Accessibility features section -->
+        <section aria-labelledby="features-heading" class="py-16 bg-white/5 backdrop-blur-md" id="features">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 id="features-heading" class="text-3xl font-bold mb-3 text-white">Accessibility Features</h2>
+                    <p class="text-lg text-white/80 max-w-2xl mx-auto">
+                        Choose the mode that best suits your needs. Our system remembers your preference for future visits.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="feature-card bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 hover:border-white/30 cursor-pointer" 
+                         onclick="openModal('ai-modal')"
+                         data-aos="fade-up" data-aos-delay="100">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center mb-4 transform transition-transform duration-300">
+                            <i class="fas fa-eye text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">AI Visual Recognition</h3>
+                        <p class="text-white/80 mb-4">
+                            Advanced computer vision technology that identifies accessibility barriers in real-time.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Real-time obstacle detection</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Smart route optimization</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Voice-guided navigation</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 hover:border-white/30 cursor-pointer" 
+                         onclick="openModal('mapping-modal')"
+                         data-aos="fade-up" data-aos-delay="200">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-4 transform transition-transform duration-300">
+                            <i class="fas fa-map-marked-alt text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Smart Mapping</h3>
+                        <p class="text-white/80 mb-4">
+                            Interactive 3D maps with accessibility overlays and real-time updates from the community.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Accessibility overlays</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Real-time updates</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Community reports</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 hover:border-white/30 cursor-pointer" 
+                         onclick="openModal('community-modal')"
+                         data-aos="fade-up" data-aos-delay="300">
+                        <div class="w-16 h-16 bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl flex items-center justify-center mb-4 transform transition-transform duration-300">
+                            <i class="fas fa-users text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Community Network</h3>
+                        <p class="text-white/80 mb-4">
+                            Connect with local volunteers and accessibility advocates for real-time assistance.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Local volunteers</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Real-time assistance</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-check text-green-400 mr-3"></i>
+                                <span class="text-white/80">Support network</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us section -->
+        <section aria-labelledby="about-heading" class="py-16 bg-white/10 backdrop-blur-md">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 id="about-heading" class="text-3xl font-bold mb-3 text-white">About Us</h2>
+                    <p class="text-lg text-white/80 max-w-2xl mx-auto">
+                        Discover how Accessible Chennai is transforming urban mobility for everyone.
+                    </p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-start" data-aos="fade-up" data-aos-delay="100">
+                    <div class="md:w-1/2 text-left pr-8">
+                        <p class="text-white/90 mb-6">
+                            Accessible Chennai is a pioneering platform dedicated to making Chennai's public transportation system inclusive for all. Our app leverages cutting-edge AI visual recognition to identify accessibility barriers in real-time, ensuring safe and seamless navigation. With interactive 3D maps featuring accessibility overlays, users can plan routes with confidence, supported by real-time updates from our vibrant community. We offer voice-guided navigation, screen reader compatibility, and wheelchair-accessible route planning to empower individuals with disabilities, seniors, and parents. Join our mission to create a more inclusive Chennai, where everyone can move freely and independently.
+                        </p>
+                        <p class="text-white/90 mb-6">
+                            The primary purpose of Accessible Chennai is to provide a tailored experience exclusively for individuals with disabilities, ensuring they have access to a transportation system designed with their unique needs in mind. This app fosters inclusivity by offering personalized tools like real-time obstacle detection and community-driven accessibility updates, helping users navigate Chennai’s bustling streets with ease and dignity. It stands as a beacon of support, bridging gaps in mobility for those who need it most.
+                        </p>
+                        <p class="text-white/90 mb-6">
+                            This app is exclusively for disabled persons, offering a safe and supportive environment to enhance their independence. By integrating advanced technology with a dedicated community network, Accessible Chennai empowers users with disabilities to overcome physical barriers, connect with local advocates, and access reliable transportation options tailored to their requirements. Our commitment is to make every journey in Chennai a confident and accessible one for this community.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 flex flex-col md:flex-row gap-4 mt-6 md:mt-0">
+                        <img src="image.png" alt="Accessible Chennai Overview 1" class="rounded-lg w-full md:w-1/3 object-cover shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <img src="image1.png" alt="Accessible Chennai Overview 2" class="rounded-lg w-full md:w-1/3 object-cover shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <img src="image2.png" alt="Accessible Chennai Overview 3" class="rounded-lg w-full md:w-1/3 object-cover shadow-md hover:shadow-lg transition-shadow duration-300">
+                    </div>
+                </div>
+                <div class="flex justify-center gap-4 mt-8">
+                    <a href="navigate.html" class="inline-block bg-white text-blue-600 px-8 py-3 rounded-full font-medium hover:bg-gray-100 focusable transition-all duration-300 transform hover:scale-105">
+                        Explore Features
+                    </a>
+                    <a href="community.html" class="inline-block bg-transparent border border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white/10 focusable transition-all duration-300 transform hover:scale-105">
+                        Join Our Community
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to action -->
+        <section aria-labelledby="cta-heading" class="py-16 bg-white/10 backdrop-blur-md">
+            <div class="container mx-auto px-4">
+                <div class="max-w-3xl mx-auto text-center" data-aos="zoom-in">
+                    <h2 id="cta-heading" class="text-3xl font-bold mb-4 text-white">Ready to Navigate Chennai with Confidence?</h2>
+                    <p class="text-lg mb-6 text-white/90">
+                        Download the Accessible Chennai app today and experience public transport designed for everyone.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button class="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg hover:bg-gray-100 focusable transition-all duration-300 transform hover:scale-105">
+                            <div class="flex items-center">
+                                <i class="fab fa-apple mr-2 text-xl"></i>
+                                <div class="text-left">
+                                    <div class="text-xs">Download on the</div>
+                                    <div class="text-lg font-semibold leading-5">App Store</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="px-6 py-3 bg-white text-blue-600 font-medium rounded-lg hover:bg-gray-100 focusable transition-all duration-300 transform hover:scale-105">
+                            <div class="flex items-center">
+                                <i class="fab fa-google-play mr-2 text-xl"></i>
+                                <div class="text-left">
+                                    <div class="text-xs">Get it on</div>
+                                    <div class="text-lg font-semibold leading-5">Google Play</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-600/20 backdrop-blur-md text-white py-12 hidden" id="footer">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Accessible Chennai</h3>
+                    <p class="text-white/80">
+                        Empowering inclusive mobility through technology and community collaboration.
+                    </p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Developer Guide</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Privacy Policy</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">API Documentation</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Accessibility Guidelines</a></li>
+                        <li><a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Transit Maps</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <address class="not-italic text-white/80 space-y-2">
+                        <p>123 Accessibility Lane</p>
+                        <p>Chennai, Tamil Nadu 600001</p>
+                        <p>Email: <a href="mailto:info@accessiblechennai.in" class="hover:text-white focusable transition-all duration-300">info@accessiblechennai.in</a></p>
+                        <p>Phone: <a href="tel:+914412345678" class="hover:text-white focusable transition-all duration-300">+91 44 1234 5678</a></p>
+                    </address>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-white/80 mb-4 md:mb-0">
+                    &copy; 2024 Accessible Chennai. All rights reserved.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Accessibility Statement</a>
+                    <a href="#" class="text-white/80 hover:text-white focusable transition-all duration-300">Feedback</a>
+                </div>
+            </div>
         </div>
-      `).join('');
+    </footer>
 
-      routeResults.classList.remove('hidden');
-      routeResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      
-      setTimeout(() => {
-        document.querySelectorAll('.route-card').forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.add('show');
-          }, index * 200);
+    <!-- Modal Container -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div id="modal-content" class="relative bg-white/90 backdrop-blur-xl rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 transform transition-all duration-300">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 focusable">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <div id="modal-body">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Splash screen logic - VISIBLE FOR 1 SECOND
+            setTimeout(() => {
+                const splash = document.getElementById('splash');
+                splash.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                
+                setTimeout(() => {
+                    splash.classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                    document.getElementById('header').classList.remove('hidden');
+                    document.getElementById('footer').classList.remove('hidden');
+                    AOS.init({
+                        duration: 800,
+                        easing: 'ease-in-out',
+                        once: true,
+                        mirror: false
+                    });
+                }, 0);
+            }, 1000);
+
+            // Card click effects
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    this.classList.add('rotate-y', 'light-pulse');
+                    setTimeout(() => {
+                        this.classList.remove('rotate-y', 'light-pulse');
+                    }, 800);
+                });
+            });
+            
+            // Reduced motion preference
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduceMotion) {
+                document.documentElement.style.scrollBehavior = 'auto';
+                document.querySelectorAll('[data-aos]').forEach(el => {
+                    el.removeAttribute('data-aos');
+                });
+                document.querySelectorAll('.orbit').forEach(el => {
+                    el.style.animation = 'none';
+                });
+            }
         });
         
-        // Announce all route options
-        setTimeout(() => {
-          let routeAnnouncement = `Found ${routes.length} accessible route options. `;
-          routes.forEach((route, index) => {
-            routeAnnouncement += `Option ${index + 1}: ${route.name}, Duration ${route.duration}, Accessibility rating ${route.accessibilityRating} out of 5 stars. `;
-          });
-          routeAnnouncement += 'You can now choose to start navigation for any route.';
-          speakMessage(routeAnnouncement);
-          
-          // Ask user to select an option
-          askForRouteSelection();
-        }, 1000);
-      }, 300);
-    }
-
-    function generateRoutes(start, end, options) {
-      const baseRoutes = [
-        {
-          name: 'Chennai Metro + Walk',
-          description: 'Fastest route using accessible metro system',
-          icon: 'subway',
-          duration: '28 min',
-          distance: '12.8 km',
-          cost: '₹25-35',
-          accessibilityRating: options.wheelchair ? 5 : 4,
-          features: ['Wheelchair Access', 'Audio Announcements', 'Tactile Paths', 'Elevator Access'],
-          steps: [
-            `Walk 3 minutes from ${start} to nearest Metro station`,
-            'Board Blue Line Metro (wheelchair accessible coach available)',
-            'Travel 8 stations with Tamil & English announcements',
-            'Transfer at Central Metro Station using accessible walkway',
-            'Continue on Green Line for 4 more stations',
-            `Exit using elevator and walk 5 minutes to ${end} via tactile pathway`
-          ],
-          transitMode: 'rail'
-        },
-        {
-          name: 'MTC Low-Floor Bus',
-          description: 'Direct bus route with accessibility features',
-          icon: 'bus',
-          duration: '42 min',
-          distance: '15.2 km',
-          cost: '₹8-12',
-          accessibilityRating: options.wheelchair ? 4 : 3,
-          features: ['Low-Floor Entry', 'Priority Seating', 'Audio Stops', 'Wheelchair Space'],
-          steps: [
-            `Walk 2 minutes to bus stop near ${start}`,
-            'Board MTC Route 21G (wheelchair accessible low-floor bus)',
-            'Audio announcements will announce each stop in Tamil and English',
-            'Enjoy priority seating and wheelchair accommodation',
-            `Request stop announcement 2 stops before ${end}`,
-            `Exit using rear ramp and walk 3 minutes to destination`
-          ],
-          transitMode: 'bus'
-        },
-        {
-          name: 'Mixed Transport (Optimized)',
-          description: 'Combination of metro and bus for best accessibility',
-          icon: 'route',
-          duration: '35 min',
-          distance: '13.5 km',
-          cost: '₹20-30',
-          accessibilityRating: options.stepFree ? 5 : 4,
-          features: ['Full Accessibility Chain', 'Covered Walkways', 'Audio Guidance', 'Step-Free'],
-          steps: [
-            `Share auto to Metro station (wheelchair accessible vehicle available)`,
-            'Take Metro Blue Line with full accessibility features',
-            'Walk through covered accessible bridge to bus terminal',
-            'Board connecting MTC bus with low-floor entry',
-            'Audio navigation continues throughout journey',
-            `Arrive at ${end} via accessible drop-off point`
-          ],
-          transitMode: 'bus,rail'
+        // Modal functions
+        function openModal(modalType) {
+            const modalContainer = document.getElementById('modal-container');
+            const modalBody = document.getElementById('modal-body');
+            
+            let content = '';
+            switch(modalType) {
+                case 'ai-modal':
+                    content = `
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">AI Visual Recognition</h3>
+                        <p class="text-gray-700 mb-6">Our advanced computer vision technology helps identify accessibility barriers in real-time and suggests alternative routes.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold text-blue-800 mb-2">How It Works</h4>
+                            <ul class="list-disc pl-5 text-gray-700">
+                                <li class="mb-1">Scans surroundings for obstacles</li>
+                                <li class="mb-1">Identifies accessible pathways</li>
+                                <li class="mb-1">Provides audio descriptions</li>
+                                <li>Updates in real-time</li>
+                            </ul>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="AI technology" class="rounded-lg w-full h-auto mb-6">
+                    `;
+                    break;
+                case 'mapping-modal':
+                    content = `
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Smart Mapping</h3>
+                        <p class="text-gray-700 mb-6">Interactive 3D maps with accessibility overlays help you navigate Chennai with confidence.</p>
+                        <div class="bg-green-50 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold text-green-800 mb-2">Features</h4>
+                            <ul class="list-disc pl-5 text-gray-700">
+                                <li class="mb-1">Accessibility heatmaps</li>
+                                <li class="mb-1">Real-time updates</li>
+                                <li class="mb-1">Community reports</li>
+                                <li>Offline mode available</li>
+                            </ul>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Smart mapping" class="rounded-lg w-full h-auto mb-6">
+                    `;
+                    break;
+                case 'community-modal':
+                    content = `
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Community Network</h3>
+                        <p class="text-gray-700 mb-6">Connect with local volunteers and accessibility advocates who can provide real-time assistance.</p>
+                        <div class="bg-amber-50 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold text-amber-800 mb-2">Benefits</h4>
+                            <ul class="list-disc pl-5 text-gray-700">
+                                <li class="mb-1">Local guides</li>
+                                <li class="mb-1">Real-time assistance</li>
+                                <li class="mb-1">Accessibility reviews</li>
+                                <li>Support network</li>
+                            </ul>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Community support" class="rounded-lg w-full h-auto mb-6">
+                    `;
+                    break;
+            }
+            
+            modalBody.innerHTML = content;
+            modalContainer.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
-      ];
-
-      let filteredRoutes = baseRoutes;
-      
-      if (options.wheelchair) {
-        filteredRoutes = filteredRoutes.filter(route => 
-          route.features.includes('Wheelchair Access') || 
-          route.features.includes('Low-Floor Entry') ||
-          route.features.includes('Full Accessibility Chain')
-        );
-      }
-
-      if (options.stepFree) {
-        filteredRoutes = filteredRoutes.filter(route => 
-          route.features.includes('Step-Free') || 
-          route.features.includes('Elevator Access')
-        );
-      }
-
-      return filteredRoutes.sort((a, b) => b.accessibilityRating - a.accessibilityRating);
-    }
-
-    function startNavigation(routeIndex) {
-      const routeCard = document.querySelector(`[data-route-index="${routeIndex}"]`);
-      routeCard.classList.add('selected');
-      
-      currentRoute = routeIndex;
-      
-      speakMessage(`STARTING NAVIGATION FOR OPTION ${routeIndex + 1}. Opening Google Maps with voice guidance enabled.`);
-
-      document.getElementById('map-overlay').style.display = 'flex';
-      
-      setTimeout(() => {
-        routeCard.classList.remove('selected');
-      }, 800);
-    }
-
-    function proceedToMaps() {
-      const start = document.getElementById('current-location').value;
-      const end = document.getElementById('destination').value;
-      const routeCard = document.querySelector(`[data-route-index="${currentRoute}"]`);
-      const transitMode = routeCard ? generateRoutes(start, end, {
-        wheelchair: document.getElementById('wheelchair-access').checked,
-        voiceGuide: document.getElementById('voice-guide').checked,
-        stepFree: document.getElementById('step-free').checked
-      })[currentRoute].transitMode : 'bus,rail';
-      
-      const mapsUrl = `https://www.google.com/maps/dir/${encodeURIComponent(start)}/${encodeURIComponent(end)}/?travelmode=transit&transit_mode=${transitMode}&dirflg=r`;
-      
-      window.open(mapsUrl, '_blank');
-      
-      closeMapOverlay();
-    }
-
-    function closeMapOverlay() {
-      document.getElementById('map-overlay').style.display = 'none';
-    }
-
-    function shareRoute(routeIndex) {
-      const shareText = `Check out this accessible route I found in Chennai using Accessible Chennai app!`;
-      
-      if (navigator.share) {
-        navigator.share({
-          title: 'Accessible Route - Chennai',
-          text: shareText,
-          url: window.location.href
-        }).catch(() => {
-          fallbackShare(shareText);
-        });
-      } else {
-        fallbackShare(shareText);
-      }
-    }
-
-    function fallbackShare(text) {
-      if (navigator.clipboard) {
-        const shareUrl = `${window.location.href}?route=${currentRoute}`;
-        navigator.clipboard.writeText(`${text} ${shareUrl}`);
-      }
-    }
-
-    function saveRoute(routeIndex) {
-      const routeName = document.querySelector(`[data-route-index="${routeIndex}"] h4`).textContent.trim();
-      
-      if (typeof(Storage) !== "undefined") {
-        let savedRoutes = JSON.parse(sessionStorage.getItem('savedRoutes') || '[]');
-        const routeData = {
-          index: routeIndex,
-          name: routeName,
-          start: document.getElementById('current-location').value,
-          end: document.getElementById('destination').value,
-          timestamp: new Date().toISOString()
-        };
         
-        savedRoutes.push(routeData);
-        sessionStorage.setItem('savedRoutes', JSON.stringify(savedRoutes));
-      }
-    }
-
-    function speakMessage(message) {
-      if (speechSynthesis) {
-        speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.rate = 0.9;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        utterance.lang = 'en-GB';
-
-        const voices = speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          const preferredVoice = voices.find(voice => 
-            voice.lang === 'en-GB' && voice.localService && voice.name.includes('Enhanced')
-          ) || voices.find(voice => 
-            voice.lang === 'en-GB' && voice.localService
-          ) || voices.find(voice => 
-            voice.lang.startsWith('en-') && voice.localService
-          ) || voices.find(voice => 
-            voice.lang === 'en-GB'
-          );
-          
-          if (preferredVoice) {
-            utterance.voice = preferredVoice;
-          }
+        function closeModal() {
+            const modalContainer = document.getElementById('modal-container');
+            modalContainer.classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
-
-        speechSynthesis.speak(utterance);
-      }
-    }
-
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-      if (speechRecognition) {
-        speechRecognition.stop();
-      }
-      speechSynthesis.cancel();
-    });
-  </script> 
+    </script>
 </body>
 </html>

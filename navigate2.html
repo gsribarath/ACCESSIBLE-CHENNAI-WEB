@@ -301,7 +301,6 @@
       50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
     }
 
-    /* Dropdown Styling */
     select {
       appearance: none;
       background-color: #FFFFFF;
@@ -607,15 +606,19 @@
     </div>
   </div>
 
+  <div id="listening-indicator" class="listening-indicator">Listening...</div>
+
   <script>
     // Global variables
     let speechSynthesis = window.speechSynthesis;
     let speechRecognition = null;
     let currentRoute = null;
     let voiceInteractionState = {
-      isActive: true,
-      currentStep: 0, // 0: initial, 1: start location, 2: destination, 3: route selection
-      listening: false
+      isActive: true, // Voice assistant enabled by default
+      currentStep: 0, // 0: initial, 1: start location, 2: destination, 3: find route, 4: select option, 5: start navigation
+      listening: false,
+      currentLocation: null,
+      destination: null
     };
 
     // Initialize the application
@@ -644,76 +647,126 @@
       });
 
       document.getElementById('journey-form').addEventListener('submit', handleRouteSearch);
+
+      // Ensure voice guide is enabled by default
+      document.getElementById('voice-guide').checked = true;
     }
 
     function setupSpeechRecognition() {
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         speechRecognition = new SpeechRecognition();
-        speechRecognition.continuous = true;
+        speechRecognition.continuous = false;
         speechRecognition.interimResults = false;
         speechRecognition.lang = 'en-IN';
         
         speechRecognition.onresult = (event) => {
-          const result = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+          const result = event.results[0][0].transcript.toLowerCase().trim();
+          voiceInteractionState.listening = false;
+          document.getElementById('listening-indicator').style.display = 'none';
           processVoiceCommand(result);
         };
 
         speechRecognition.onerror = (event) => {
+          voiceInteractionState.listening = false;
+          document.getElementById('listening-indicator').style.display = 'none';
           if (event.error === 'not-allowed') {
             voiceInteractionState.isActive = false;
+            speakMessage('Microphone access is denied. Please enable microphone permissions to use voice navigation.');
+          } else {
+            speakMessage('Sorry, I could not understand. Please try again.', () => {
+              startListening();
+            });
           }
         };
+
+        speechRecognition.onend = () => {
+          voiceInteractionState.listening = false;
+          document.getElementById('listening-indicator').style.display = 'none';
+          if (voiceInteractionState.isActive && voiceInteractionState.currentStep !== 0) {
+            startListening();
+          }
+        };
+      } else {
+        voiceInteractionState.isActive = false;
+        speakMessage('Voice navigation is not supported in this browser. Please use the form to select locations.');
+      }
+    }
+
+    function startListening() {
+      if (speechRecognition && voiceInteractionState.isActive && !voiceInteractionState.listening) {
+        try {
+          speechRecognition.start();
+          voiceInteractionState.listening = true;
+          document.getElementById('listening-indicator').style.display = 'block';
+          speakMessage('I am listening. Please speak now.');
+        } catch (e) {
+          console.log('Speech recognition error:', e);
+        }
+      }
+    }
+
+    function stopListening() {
+      if (speechRecognition && voiceInteractionState.listening) {
+        speechRecognition.stop();
+        voiceInteractionState.listening = false;
+        document.getElementById('listening-indicator').style.display = 'none';
       }
     }
 
     function startVoiceInteraction() {
-      // Initial welcome message
-      speakMessage("WELCOME TO THE NAVIGATE PAGE, I AM HERE TO HELP YOU");
-      
-      // Start listening in background
-      if (speechRecognition) {
-        try {
-          speechRecognition.start();
-        } catch (e) {
-          console.log("Speech recognition not available");
+      // Immediate welcome message with guidance for blind users
+      speakMessage("Welcome to the Accessible Chennai navigation page. I am your voice assistant to help you navigate. I will guide you step-by-step. Please wait two seconds, then say your current location.", () => {
+        setTimeout(() => {
+          voiceInteractionState.currentStep = 1;
+          speakMessage("Please say your current location now.", () => {
+            startListening();
+          });
+        }, 2000);
+      });
+    }
+
+    function speakMessage(message, callback) {
+      if (!voiceInteractionState.isActive) {
+        if (callback) callback();
+        return;
+      }
+
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      utterance.lang = 'en-GB';
+
+      // Select high-quality voice
+      const voices = speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const preferredVoice = voices.find(voice => 
+          voice.lang === 'en-GB' && voice.localService && voice.name.includes('Enhanced')
+        ) || voices.find(voice => 
+          voice.lang === 'en-GB' && voice.localService
+        ) || voices.find(voice => 
+          voice.lang.startsWith('en-') && voice.localService
+        ) || voices.find(voice => 
+          voice.lang === 'en-GB'
+        );
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
         }
       }
 
-      // Ask for start location after initial message
-      setTimeout(() => {
-        askForStartLocation();
-      }, 3000);
-    }
+      utterance.onend = () => {
+        if (callback) callback();
+      };
 
-    function askForStartLocation() {
-      voiceInteractionState.currentStep = 1;
-      speakMessage("PLEASE SELECT YOUR CURRENT LOCATION.");
-    }
-
-    function askForDestination() {
-      voiceInteractionState.currentStep = 2;
-      speakMessage("PLEASE SELECT YOUR DESTINATION.");
-    }
-
-    function confirmLocationsSelected() {
-      speakMessage("CURRENT LOCATION AND DESTINATION SELECTED SUCCESSFULLY");
-      
-      // Auto-submit the form if both locations are selected
-      const start = document.getElementById('current-location').value;
-      const dest = document.getElementById('destination').value;
-      
-      if (start && dest) {
-        setTimeout(() => {
-          document.getElementById('journey-form').dispatchEvent(new Event('submit'));
-        }, 2000);
+      // Preload voices to avoid lag
+      if (!speechSynthesis.getVoices().length) {
+        speechSynthesis.getVoices();
       }
-    }
 
-    function askForRouteSelection() {
-      voiceInteractionState.currentStep = 3;
-      // This message is now strictly "SELECT THE OPTION"
-      speakMessage("SELECT THE OPTION");
+      speechSynthesis.speak(utterance);
     }
 
     function processVoiceCommand(input) {
@@ -732,26 +785,81 @@
         case 1: // Start location
           const startLocation = findBestMatch(input, chennaiLocations);
           if (startLocation) {
+            voiceInteractionState.currentLocation = startLocation;
             setStartLocation(startLocation);
-            askForDestination();
+            voiceInteractionState.currentStep = 2;
+            speakMessage(`Current location set to ${startLocation}. Please say your destination now.`, () => {
+              startListening();
+            });
+          } else {
+            speakMessage("Sorry, I didn't recognize that location. Please say your current location again, such as Anna Nagar or Marina Beach.", () => {
+              startListening();
+            });
           }
           break;
 
         case 2: // Destination
           const destination = findBestMatch(input, chennaiLocations);
           if (destination) {
+            voiceInteractionState.destination = destination;
             setDestination(destination);
-            confirmLocationsSelected();
+            voiceInteractionState.currentStep = 3;
+            speakMessage(`Destination set to ${destination}. Please say YES to find an accessible route.`, () => {
+              startListening();
+            });
+          } else {
+            speakMessage("Sorry, I didn't recognize that destination. Please say your destination again, such as T. Nagar or Chennai Airport.", () => {
+              startListening();
+            });
           }
           break;
 
-        case 3: // Route selection
+        case 3: // Find route
+          if (input.includes('yes')) {
+            voiceInteractionState.currentStep = 4;
+            handleRouteSearch({ preventDefault: () => {} });
+          } else {
+            speakMessage("Please say YES to find an accessible route.", () => {
+              startListening();
+            });
+          }
+          break;
+
+        case 4: // Select option
           if (input.includes('option 1') || input.includes('option one') || input.includes('first option')) {
-            startNavigation(0);
+            voiceInteractionState.currentStep = 5;
+            currentRoute = 0;
+            speakMessage("You selected option 1. Say START NAVIGATION to begin.", () => {
+              startListening();
+            });
           } else if (input.includes('option 2') || input.includes('option two') || input.includes('second option')) {
-            startNavigation(1);
+            voiceInteractionState.currentStep = 5;
+            currentRoute = 1;
+            speakMessage("You selected option 2. Say START NAVIGATION to begin.", () => {
+              startListening();
+            });
           } else if (input.includes('option 3') || input.includes('option three') || input.includes('third option')) {
-            startNavigation(2);
+            voiceInteractionState.currentStep = 5;
+            currentRoute = 2;
+            speakMessage("You selected option 3. Say START NAVIGATION to begin.", () => {
+              startListening();
+            });
+          } else {
+            speakMessage("Please choose one option. Say OPTION 1, OPTION 2, or OPTION 3.", () => {
+              startListening();
+            });
+          }
+          break;
+
+        case 5: // Start navigation
+          if (input.includes('start navigation')) {
+            speakMessage("Opening Google Maps with your selected route.", () => {
+              proceedToMaps();
+            });
+          } else {
+            speakMessage("Please say START NAVIGATION to begin.", () => {
+              startListening();
+            });
           }
           break;
       }
@@ -834,13 +942,11 @@
     function setStartLocation(location) {
       const startSelect = document.getElementById('current-location');
       startSelect.value = location;
-      // Removed the voice message from here as per instructions, it's now handled by confirmLocationsSelected.
     }
 
     function setDestination(location) {
       const destSelect = document.getElementById('destination');
       destSelect.value = location;
-      // Removed the voice message from here as per instructions, it's now handled by confirmLocationsSelected.
     }
 
     function handleRouteSearch(event) {
@@ -850,14 +956,16 @@
       const destination = document.getElementById('destination').value;
       
       if (!destination || !currentLocation) {
-        speakMessage('Please ensure both start location and destination are selected.');
+        speakMessage('Please ensure both start location and destination are selected. Say your current location again.');
+        voiceInteractionState.currentStep = 1;
+        startListening();
         return;
       }
 
       const routeButton = document.getElementById('route-button-text');
       routeButton.innerHTML = '<div class="loading-spinner mr-2"></div> Finding Routes...';
       
-      speakMessage('Searching for accessible routes. Please wait...');
+      speakMessage('Searching for accessible routes. Please wait.');
 
       setTimeout(() => {
         displayRouteOptions(currentLocation, destination);
@@ -963,19 +1071,22 @@
           }, index * 200);
         });
         
-        // Announce all route options and then ask for selection
-        setTimeout(() => {
-          let routeAnnouncement = `Found ${routes.length} accessible route options. `;
-          routes.forEach((route, index) => {
-            routeAnnouncement += `Option ${index + 1}: ${route.name}, Duration ${route.duration}, Accessibility rating ${route.accessibilityRating} out of 5 stars. `;
-          });
-          speakMessage(routeAnnouncement);
-          
-          // Ask user to select an option after the routes are announced
+        // Announce routes one by one
+        let delay = 1000;
+        routes.forEach((route, index) => {
           setTimeout(() => {
-            askForRouteSelection();
-          }, routeAnnouncement.length * 50); // Delay for the length of the announcement
-        }, 1000);
+            const routeAnnouncement = `Option ${index + 1}: ${route.name}, takes ${route.duration}, with an accessibility rating of ${route.accessibilityRating} out of 5 stars.`;
+            speakMessage(routeAnnouncement);
+          }, delay);
+          delay += 4000;
+        });
+
+        // Ask for route selection after all routes are announced
+        setTimeout(() => {
+          speakMessage("Please choose one option. Say OPTION 1, OPTION 2, or OPTION 3.", () => {
+            startListening();
+          });
+        }, delay);
       }, 300);
     }
 
@@ -1066,11 +1177,11 @@
       
       currentRoute = routeIndex;
       
-      // Updated to match the exact requested message
-      speakMessage(`STARTING NAVIGATION FOR OPTION ${routeIndex + 1}`);
+      voiceInteractionState.currentStep = 5;
+      speakMessage(`You selected option ${routeIndex + 1}. Say START NAVIGATION to begin.`, () => {
+        startListening();
+      });
 
-      document.getElementById('map-overlay').style.display = 'flex';
-      
       setTimeout(() => {
         routeCard.classList.remove('selected');
       }, 800);
@@ -1088,7 +1199,7 @@
       
       const mapsUrl = `https://www.google.com/maps/dir/${encodeURIComponent(start)}/${encodeURIComponent(end)}/?travelmode=transit&transit_mode=${transitMode}&dirflg=r`;
       
-      window.open(mapsUrl, '_blank');
+      window.location.href = mapsUrl;
       
       closeMapOverlay();
     }
@@ -1117,6 +1228,7 @@
       if (navigator.clipboard) {
         const shareUrl = `${window.location.href}?route=${currentRoute}`;
         navigator.clipboard.writeText(`${text} ${shareUrl}`);
+        speakMessage('Route link copied to clipboard.');
       }
     }
 
@@ -1135,39 +1247,16 @@
         
         savedRoutes.push(routeData);
         sessionStorage.setItem('savedRoutes', JSON.stringify(savedRoutes));
+        speakMessage(`Route ${routeName} saved successfully.`);
       }
     }
 
-    function speakMessage(message) {
-      if (speechSynthesis) {
-        speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.rate = 0.9;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        utterance.lang = 'en-GB';
-
-        const voices = speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          const preferredVoice = voices.find(voice => 
-            voice.lang === 'en-GB' && voice.localService && voice.name.includes('Enhanced')
-          ) || voices.find(voice => 
-            voice.lang === 'en-GB' && voice.localService
-          ) || voices.find(voice => 
-            voice.lang.startsWith('en-') && voice.localService
-          ) || voices.find(voice => 
-            voice.lang === 'en-GB'
-          );
-          
-          if (preferredVoice) {
-            utterance.voice = preferredVoice;
-          }
-        }
-
-        speechSynthesis.speak(utterance);
-      }
-    }
+    // Preload voices on load
+    window.addEventListener('load', () => {
+      speechSynthesis.getVoices();
+      voiceInteractionState.isActive = true;
+      startVoiceInteraction();
+    });
 
     // Cleanup on page unload
     window.addEventListener('beforeunload', () => {
@@ -1176,6 +1265,6 @@
       }
       speechSynthesis.cancel();
     });
-  </script> 
+  </script>
 </body>
 </html>
